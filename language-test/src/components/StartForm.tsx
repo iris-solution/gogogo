@@ -65,21 +65,20 @@ export default function StartForm({ configs, onStart }: Props) {
   return (
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-lg">
       <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/60">
-        {/* Dải logo nền trắng */}
-        <div className="flex items-center justify-center border-b border-zinc-100 bg-white px-6 py-7">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo/paihong.png"
-            alt="PAIHO"
-            className="h-20 w-auto object-contain sm:h-24"
-          />
-        </div>
-        {/* Header gradient */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-orange-500 px-8 py-8 text-white">
+        {/* Header gradient: logo bo góc, to, căn giữa, phía trên tiêu đề */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-orange-500 px-8 py-9 text-white">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <div className="relative">
-            <h1 className="text-2xl font-bold">Bài kiểm tra ngôn ngữ</h1>
+          <div className="relative flex flex-col items-center text-center">
+            <div className="rounded-2xl bg-white px-7 py-5 shadow-xl shadow-red-900/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/paihong.png"
+                alt="PAIHO"
+                className="h-24 w-auto object-contain sm:h-28"
+              />
+            </div>
+            <h1 className="mt-6 text-2xl font-bold">Bài kiểm tra ngôn ngữ</h1>
             <p className="mt-1 text-sm text-orange-50">
               Nhập thông tin và chọn bài test để bắt đầu.
             </p>
