@@ -31,7 +31,7 @@ export interface ChoiceQuestion extends Base {
 export interface FillQuestion extends Base {
   kind: "fill";
   accepted: string[]; // các đáp án được chấp nhận
-  suggestions: string[]; // gợi ý hiển thị
+  suggestion: string; // gợi ý hiển thị (nguyên văn từ sheet)
 }
 
 export type Answerable = ChoiceQuestion | FillQuestion;

@@ -98,11 +98,9 @@ function makeAnswerable(row: Row): Answerable {
       .split(/[|/]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    const suggestions = clean(row.SuggestionAnswer)
-      .split(/[/|]/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return { ...base, kind: "fill", accepted, suggestions };
+    // Giữ nguyên văn nội dung gợi ý đúng như trong sheet (không tách).
+    const suggestion = clean(row.SuggestionAnswer);
+    return { ...base, kind: "fill", accepted, suggestion };
   }
 
   const options = buildOptions(row);

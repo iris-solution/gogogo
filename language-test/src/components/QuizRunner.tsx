@@ -9,6 +9,7 @@ import type {
   FillQuestion,
   QuizItem,
 } from "@/lib/types";
+import { FcIdea } from "react-icons/fc";
 import { flatten, isCorrect } from "@/lib/quiz";
 import Media from "./Media";
 
@@ -123,18 +124,11 @@ export default function QuizRunner({
               : "border-zinc-300 bg-white/40 focus:border-orange-500 focus:bg-white/70 focus:ring-2 focus:ring-orange-100"
           }`}
         />
-        {q.suggestions.length > 0 && !review && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-zinc-400">Gợi ý:</span>
-            {q.suggestions.map((s, i) => (
-              <span
-                key={i}
-                className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
+        {q.suggestion && !review && (
+          <p className="flex items-start gap-1.5 text-sm text-amber-700">
+            <FcIdea className="mt-0.5 h-4 w-4 shrink-0" />
+            <span className="whitespace-pre-line">{q.suggestion}</span>
+          </p>
         )}
         {review && (
           <p className="text-sm">
@@ -159,9 +153,9 @@ export default function QuizRunner({
         {q.media && <Media url={q.media} />}
         {q.kind === "choice" ? renderChoice(q) : renderFill(q)}
         {review && q.description && (
-          <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            💡 {q.description}
-          </p>
+          <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            <span className="whitespace-pre-line">{q.description}</span>
+          </div>
         )}
       </div>
     );
