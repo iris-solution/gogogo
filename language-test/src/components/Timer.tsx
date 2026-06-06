@@ -67,7 +67,7 @@ export default function Timer({ startAt, timeLimitMin, onExpire }: Props) {
       <span className="ml-1 hidden h-1 w-16 overflow-hidden rounded-full bg-zinc-200 sm:block">
         <span
           className={`block h-full rounded-full transition-all duration-1000 ${
-            danger ? "bg-red-500" : warn ? "bg-amber-500" : "bg-blue-500"
+            danger ? "bg-red-500" : warn ? "bg-amber-500" : "bg-orange-500"
           }`}
           style={{ width: `${ratio * 100}%` }}
         />

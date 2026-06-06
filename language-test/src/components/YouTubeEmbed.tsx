@@ -11,7 +11,7 @@ export default function YouTubeEmbed({ url }: { url: string }) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-sm text-blue-600 underline"
+        className="text-sm text-red-600 underline"
       >
         Mở media
       </a>

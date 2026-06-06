@@ -64,22 +64,23 @@ export default function StartForm({ configs, onStart }: Props) {
 
   return (
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-lg">
-      <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl shadow-blue-100/50">
+      <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/60">
+        {/* Dải logo nền trắng */}
+        <div className="flex items-center justify-center border-b border-zinc-100 bg-white px-6 py-7">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo/paihong.png"
+            alt="PAIHO"
+            className="h-20 w-auto object-contain sm:h-24"
+          />
+        </div>
         {/* Header gradient */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-8 py-10 text-white">
+        <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-orange-500 px-8 py-8 text-white">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="relative">
-            <div className="mb-3 inline-flex h-14 items-center justify-center rounded-2xl bg-white px-3 py-2 shadow-lg">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/paihong.png"
-                alt="Logo"
-                className="h-9 w-auto object-contain"
-              />
-            </div>
             <h1 className="text-2xl font-bold">Bài kiểm tra ngôn ngữ</h1>
-            <p className="mt-1 text-sm text-blue-100">
+            <p className="mt-1 text-sm text-orange-50">
               Nhập thông tin và chọn bài test để bắt đầu.
             </p>
           </div>
@@ -118,8 +119,8 @@ export default function StartForm({ configs, onStart }: Props) {
                   }}
                   className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
                     language === lng
-                      ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-200"
-                      : "border-zinc-200 bg-white text-zinc-600 hover:border-blue-300"
+                      ? "border-red-500 bg-red-50 text-red-700 ring-1 ring-red-200"
+                      : "border-zinc-200 bg-white text-zinc-600 hover:border-red-300"
                   }`}
                 >
                   {langLabel(lng)}
@@ -137,8 +138,8 @@ export default function StartForm({ configs, onStart }: Props) {
                   onClick={() => setCatalog(t.catalog)}
                   className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all ${
                     catalog === t.catalog
-                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-200"
-                      : "border-zinc-200 bg-white hover:border-blue-300"
+                      ? "border-red-500 bg-red-50 ring-1 ring-red-200"
+                      : "border-zinc-200 bg-white hover:border-red-300"
                   }`}
                 >
                   <span>
@@ -171,7 +172,7 @@ export default function StartForm({ configs, onStart }: Props) {
           <button
             onClick={handleStart}
             disabled={!canStart}
-            className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 font-semibold text-white shadow-lg shadow-blue-200 transition-all hover:shadow-xl hover:shadow-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3.5 font-semibold text-white shadow-lg shadow-orange-200 transition-all hover:shadow-xl hover:shadow-orange-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

@@ -62,13 +62,13 @@ export default function QuizRunner({
         {q.options.map((opt) => {
           const picked = selected.includes(opt.key);
           const correct = q.correct.includes(opt.key);
-          let style = "border-zinc-200 bg-white hover:border-blue-300";
+          let style = "border-zinc-200 bg-white hover:border-orange-300";
           if (review) {
             if (correct) style = "border-green-500 bg-green-50";
             else if (picked) style = "border-red-400 bg-red-50";
             else style = "border-zinc-200 bg-white";
           } else if (picked) {
-            style = "border-blue-500 bg-blue-50 ring-1 ring-blue-200";
+            style = "border-red-500 bg-red-50 ring-1 ring-red-200";
           }
           return (
             <label
@@ -83,7 +83,7 @@ export default function QuizRunner({
                 checked={picked}
                 onChange={() => onToggleChoice?.(q, opt.key)}
                 disabled={review}
-                className="h-4 w-4 accent-blue-600"
+                className="h-4 w-4 accent-red-600"
               />
               <span className="font-semibold text-zinc-400">{opt.key}.</span>
               <span className="text-zinc-800">{opt.text}</span>
@@ -119,7 +119,7 @@ export default function QuizRunner({
               ? correct
                 ? "border-green-500 bg-green-50"
                 : "border-red-400 bg-red-50"
-              : "border-zinc-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              : "border-zinc-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
           }`}
         />
         {q.suggestions.length > 0 && !review && (
@@ -152,7 +152,7 @@ export default function QuizRunner({
     return (
       <div key={q.id} className={child ? "border-l-2 border-zinc-200 pl-4" : ""}>
         <div className="mb-2 flex gap-2">
-          <span className="shrink-0 font-bold text-blue-600">Câu {num}.</span>
+          <span className="shrink-0 font-bold text-red-600">Câu {num}.</span>
           <span className="font-medium text-zinc-900">{q.question}</span>
         </div>
         {q.media && <YouTubeEmbed url={q.media} />}
@@ -176,7 +176,7 @@ export default function QuizRunner({
           {item.kind === "passage" ? (
             <div className="space-y-4">
               <div>
-                <span className="mb-2 inline-block rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-700">
+                <span className="mb-2 inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
                   Đoạn văn
                 </span>
                 <p className="text-lg leading-relaxed text-zinc-900">

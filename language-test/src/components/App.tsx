@@ -227,7 +227,7 @@ export default function App({ configs }: { configs: TestConfig[] }) {
           <div className="mt-2 flex items-center gap-2">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200">
               <div
-                className="h-full rounded-full bg-blue-500 transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 transition-all"
                 style={{
                   width: `${answerables.length ? (answered / answerables.length) * 100 : 0}%`,
                 }}
@@ -251,7 +251,7 @@ export default function App({ configs }: { configs: TestConfig[] }) {
         <div className="sticky bottom-4 z-10 mt-6">
           <button
             onClick={handleManualSubmit}
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 font-semibold text-white shadow-lg shadow-blue-200 transition hover:shadow-xl"
+            className="w-full rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3.5 font-semibold text-white shadow-lg shadow-orange-200 transition hover:shadow-xl"
           >
             Nộp bài ({answered}/{answerables.length})
           </button>
@@ -265,7 +265,7 @@ function CenterLoader({ text }: { text: string }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-zinc-400">
       <svg
-        className="h-8 w-8 animate-spin text-blue-500"
+        className="h-8 w-8 animate-spin text-red-500"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

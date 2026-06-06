@@ -21,8 +21,6 @@ const LANG_LABEL: Record<string, string> = {
 export default function Results({ session, items, saveState, onFinish }: Props) {
   const r = session.result!;
   const pass = r.percent >= 50;
-  const ring =
-    r.percent >= 80 ? "#16a34a" : r.percent >= 50 ? "#2563eb" : "#dc2626";
   const circ = 2 * Math.PI * 52;
   const dash = (r.percent / 100) * circ;
 
@@ -30,13 +28,7 @@ export default function Results({ session, items, saveState, onFinish }: Props) 
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-2xl">
       {/* Hero kết quả */}
       <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl">
-        <div
-          className={`relative px-8 py-8 text-white ${
-            pass
-              ? "bg-gradient-to-br from-emerald-500 via-green-600 to-teal-600"
-              : "bg-gradient-to-br from-rose-500 via-red-600 to-orange-600"
-          }`}
-        >
+        <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-red-600 px-8 py-8 text-white">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">
             {/* Vòng tròn phần trăm */}
@@ -99,7 +91,7 @@ export default function Results({ session, items, saveState, onFinish }: Props) 
       {/* Chi tiết từng câu */}
       <div className="mt-8">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-zinc-900">
-          <span className="inline-block h-5 w-1 rounded-full bg-blue-600" />
+          <span className="inline-block h-5 w-1 rounded-full bg-red-600" />
           Chi tiết bài làm
         </h2>
         <QuizRunner
@@ -149,7 +141,7 @@ function Stat({
 function SaveBadge({ state }: { state: SaveState }) {
   const map = {
     saving: {
-      cls: "border-blue-200 bg-blue-50 text-blue-700",
+      cls: "border-orange-200 bg-orange-50 text-orange-700",
       text: "Đang lưu kết quả về Google Sheets...",
     },
     saved: {
