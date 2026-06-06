@@ -70,8 +70,13 @@ export default function StartForm({ configs, onStart }: Props) {
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <div className="relative">
-            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
-              <span className="text-2xl">📝</span>
+            <div className="mb-3 inline-flex h-14 items-center justify-center rounded-2xl bg-white px-3 py-2 shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/paihong.png"
+                alt="Logo"
+                className="h-9 w-auto object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold">Bài kiểm tra ngôn ngữ</h1>
             <p className="mt-1 text-sm text-blue-100">
