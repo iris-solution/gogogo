@@ -102,10 +102,10 @@ export default function Results({ session, items, saveState, onFinish }: Props) 
         />
       </div>
 
-      <div className="sticky bottom-4 z-10 mt-6">
+      <div className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center">
         <button
           onClick={onFinish}
-          className="w-full rounded-xl border border-zinc-300 bg-white/90 px-6 py-3 font-semibold text-zinc-700 shadow-lg backdrop-blur transition hover:bg-zinc-50"
+          className="pointer-events-auto rounded-xl border border-black bg-black px-10 py-3 font-semibold text-white shadow-2xl transition hover:bg-zinc-800"
         >
           Hoàn tất & thoát
         </button>

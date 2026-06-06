@@ -65,16 +65,17 @@ export default function StartForm({ configs, onStart }: Props) {
   return (
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-lg">
       <div className="overflow-hidden rounded-3xl border border-orange-100/80 bg-white/95 shadow-2xl shadow-orange-200/50 backdrop-blur">
-        {/* Header: logo đặt thẳng trên nền trắng, không còn khung trắng thừa */}
-        <div className="relative flex flex-col items-center px-8 pt-10 pb-7 text-center">
+        {/* Header: logo bo góc, có nền màu phía sau */}
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-orange-100 via-amber-50 to-red-100 px-8 pt-7 pb-6 text-center">
           <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-400" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo/paihong.png"
             alt="PAIHO"
-            className="h-16 w-auto object-contain sm:h-20"
+            width={482}
+            height={107}
+            className="h-auto w-auto max-w-full rounded-xl"
           />
-          <span className="mt-5 h-1 w-12 rounded-full bg-gradient-to-r from-red-600 to-orange-500" />
           <h1 className="mt-4 text-2xl font-bold text-zinc-900">
             Bài kiểm tra ngôn ngữ
           </h1>

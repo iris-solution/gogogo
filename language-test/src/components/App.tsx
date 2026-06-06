@@ -213,16 +213,27 @@ export default function App({ configs }: { configs: TestConfig[] }) {
     <div className="px-4 py-6">
       <div className="mx-auto max-w-2xl">
         {/* Thanh trên cùng */}
-        <div className="sticky top-0 z-20 -mx-4 mb-5 border-b border-zinc-200 bg-zinc-50/90 px-4 py-3 backdrop-blur">
+        <div className="sticky top-0 z-20 -mx-4 mb-5 overflow-hidden rounded-b-2xl border-b border-orange-100 bg-white/85 px-4 pb-3 pt-3.5 shadow-sm shadow-orange-100/50 backdrop-blur">
+          <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-600 via-orange-500 to-amber-400" />
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-zinc-900">
-                {session.config.title || session.config.catalog}
-              </p>
-              <p className="truncate text-xs text-zinc-500">
-                {session.candidate.name} ·{" "}
-                {LANG_LABEL[session.config.language] ?? session.config.language}
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/paihong.png"
+                alt="PAIHO"
+                className="h-7 w-auto shrink-0 rounded-md sm:h-8"
+              />
+              <span className="hidden h-8 w-px bg-zinc-200 sm:block" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold tracking-tight text-zinc-900">
+                  {session.config.title || session.config.catalog}
+                </p>
+                <p className="truncate text-xs font-medium text-zinc-500">
+                  {session.candidate.name} ·{" "}
+                  {LANG_LABEL[session.config.language] ??
+                    session.config.language}
+                </p>
+              </div>
             </div>
             <Timer
               startAt={session.startAt}
@@ -230,8 +241,8 @@ export default function App({ configs }: { configs: TestConfig[] }) {
               onExpire={handleExpire}
             />
           </div>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200">
+          <div className="mt-2.5 flex items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-orange-100">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 transition-all"
                 style={{
@@ -239,7 +250,7 @@ export default function App({ configs }: { configs: TestConfig[] }) {
                 }}
               />
             </div>
-            <span className="shrink-0 text-xs font-medium text-zinc-500">
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-zinc-500">
               {answered}/{answerables.length}
             </span>
           </div>
