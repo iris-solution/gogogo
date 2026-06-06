@@ -49,7 +49,7 @@ export default function StartForm({ configs, onStart }: Props) {
       return;
     }
     if (!name.trim() || !email.trim()) {
-      setError("Vui lòng nhập họ tên và email.");
+      setError("Vui lòng nhập họ tên và ID nhân viên.");
       return;
     }
     setError("");
@@ -64,29 +64,27 @@ export default function StartForm({ configs, onStart }: Props) {
 
   return (
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-lg">
-      <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/60">
-        {/* Header gradient: logo bo góc, to, căn giữa, phía trên tiêu đề */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-orange-500 px-8 py-9 text-white">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <div className="relative flex flex-col items-center text-center">
-            <div className="rounded-2xl bg-white px-7 py-5 shadow-xl shadow-red-900/20">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/paihong.png"
-                alt="PAIHO"
-                className="h-24 w-auto object-contain sm:h-28"
-              />
-            </div>
-            <h1 className="mt-6 text-2xl font-bold">Bài kiểm tra ngôn ngữ</h1>
-            <p className="mt-1 text-sm text-orange-50">
-              Nhập thông tin và chọn bài test để bắt đầu.
-            </p>
-          </div>
+      <div className="overflow-hidden rounded-3xl border border-orange-100/80 bg-white/95 shadow-2xl shadow-orange-200/50 backdrop-blur">
+        {/* Header: logo đặt thẳng trên nền trắng, không còn khung trắng thừa */}
+        <div className="relative flex flex-col items-center px-8 pt-10 pb-7 text-center">
+          <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-400" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo/paihong.png"
+            alt="PAIHO"
+            className="h-16 w-auto object-contain sm:h-20"
+          />
+          <span className="mt-5 h-1 w-12 rounded-full bg-gradient-to-r from-red-600 to-orange-500" />
+          <h1 className="mt-4 text-2xl font-bold text-zinc-900">
+            Bài kiểm tra ngôn ngữ
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Nhập thông tin và chọn bài test để bắt đầu.
+          </p>
         </div>
 
         {/* Form */}
-        <div className="space-y-5 px-8 py-7">
+        <div className="space-y-5 border-t border-zinc-100 px-8 py-7">
           <Field label="Họ và tên" required>
             <input
               value={name}
@@ -96,12 +94,12 @@ export default function StartForm({ configs, onStart }: Props) {
             />
           </Field>
 
-          <Field label="Email" required>
+          <Field label="ID nhân viên" required>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="ban@example.com"
+              placeholder="VD: NV001"
               className="input"
             />
           </Field>

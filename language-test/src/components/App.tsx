@@ -27,6 +27,7 @@ export default function App({ configs }: { configs: TestConfig[] }) {
   const [items, setItems] = useState<QuizItem[] | null>(null);
   const [loadingItems, setLoadingItems] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("saving");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Khôi phục session từ localStorage sau khi mount (tránh lệch SSR)
   useEffect(() => {
@@ -149,7 +150,12 @@ export default function App({ configs }: { configs: TestConfig[] }) {
 
   const handleManualSubmit = useCallback(() => {
     if (!session || !items) return;
-    if (!window.confirm("Bạn chắc chắn muốn nộp bài?")) return;
+    setConfirmOpen(true);
+  }, [session, items]);
+
+  const confirmSubmit = useCallback(() => {
+    setConfirmOpen(false);
+    if (!session || !items) return;
     submit(session, items);
   }, [session, items, submit]);
 
@@ -254,6 +260,78 @@ export default function App({ configs }: { configs: TestConfig[] }) {
             className="w-full rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3.5 font-semibold text-white shadow-lg shadow-orange-200 transition hover:shadow-xl"
           >
             Nộp bài ({answered}/{answerables.length})
+          </button>
+        </div>
+      </div>
+
+      {confirmOpen && (
+        <ConfirmModal
+          answered={answered}
+          total={answerables.length}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={confirmSubmit}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConfirmModal({
+  answered,
+  total,
+  onCancel,
+  onConfirm,
+}: {
+  answered: number;
+  total: number;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const unanswered = total - answered;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="absolute inset-0 bg-zinc-900/50 backdrop-blur-sm animate-[fadeInUp_0.2s_ease-out]"
+        onClick={onCancel}
+      />
+      <div className="relative w-full max-w-sm animate-[scaleIn_0.2s_ease-out] overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col items-center px-6 pt-7 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-2xl text-white shadow-lg shadow-orange-200">
+            ?
+          </div>
+          <h3 className="mt-4 text-lg font-bold text-zinc-900">
+            Nộp bài kiểm tra?
+          </h3>
+          <p className="mt-1.5 text-sm text-zinc-500">
+            Bạn đã trả lời <span className="font-semibold text-zinc-700">{answered}/{total}</span> câu.
+            {unanswered > 0 && (
+              <>
+                {" "}Còn{" "}
+                <span className="font-semibold text-red-600">{unanswered}</span>{" "}
+                câu chưa trả lời.
+              </>
+            )}
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Sau khi nộp, bạn không thể chỉnh sửa đáp án.
+          </p>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-3 px-6 pb-6">
+          <button
+            onClick={onCancel}
+            className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 font-semibold text-zinc-700 transition hover:bg-zinc-50"
+          >
+            Tiếp tục làm
+          </button>
+          <button
+            onClick={onConfirm}
+            className="rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2.5 font-semibold text-white shadow-lg shadow-orange-200 transition hover:shadow-xl"
+          >
+            Nộp bài
           </button>
         </div>
       </div>

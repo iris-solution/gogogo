@@ -79,7 +79,7 @@ export default function Results({ session, items, saveState, onFinish }: Props) 
           <Stat label="Điểm" value={`${r.score}/${r.total}`} />
           <Stat label="Tỷ lệ" value={`${r.percent}%`} />
           <Stat label="Thời gian" value={r.durationText} />
-          <Stat label="Email" value={session.candidate.email} small />
+          <Stat label="ID nhân viên" value={session.candidate.email} />
         </div>
 
         {/* Trạng thái lưu */}
@@ -114,22 +114,14 @@ export default function Results({ session, items, saveState, onFinish }: Props) 
   );
 }
 
-function Stat({
-  label,
-  value,
-  small,
-}: {
-  label: string;
-  value: string;
-  small?: boolean;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-4 py-4 text-center">
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
         {label}
       </p>
       <p
-        className={`mt-1 font-bold text-zinc-900 ${small ? "truncate text-xs" : "text-lg"}`}
+        className="mt-1 truncate text-lg font-bold text-zinc-900"
         title={value}
       >
         {value}
