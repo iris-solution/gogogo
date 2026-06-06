@@ -100,7 +100,7 @@ export default function StartForm({ configs, onStart }: Props) {
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="VD: NV001"
+              placeholder="VD: 12345"
               className="input"
             />
           </Field>
