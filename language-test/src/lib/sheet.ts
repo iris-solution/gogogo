@@ -4,6 +4,7 @@ import type {
   Option,
   QuizItem,
   RawType,
+  TestConfig,
 } from "./types";
 
 const SHEET_ID =
@@ -11,6 +12,7 @@ const SHEET_ID =
 const SHEET_GID = process.env.SHEET_GID ?? "474156801";
 
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
+const CONFIG_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=config`;
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
@@ -69,7 +71,25 @@ function makeAnswerable(row: Row): Answerable {
   return { ...base, kind: "choice", options, correct, multi };
 }
 
-export async function fetchQuestions(): Promise<QuizItem[]> {
+// Đọc danh sách bài test từ tab `config`: Language | Catalog | Title | TimeLimit
+export async function fetchConfig(): Promise<TestConfig[]> {
+  const res = await fetch(CONFIG_CSV_URL, { next: { revalidate: 60 } });
+  if (!res.ok) {
+    throw new Error(`Không tải được tab config (HTTP ${res.status})`);
+  }
+  const csv = await res.text();
+  const parsed = Papa.parse<Row>(csv, { header: true, skipEmptyLines: true });
+  return parsed.data
+    .map((r) => ({
+      language: clean(r.Language),
+      catalog: clean(r.Catalog),
+      title: clean(r.Title),
+      timeLimitMin: Number(clean(r.TimeLimit)) || 0,
+    }))
+    .filter((c) => c.language && c.catalog);
+}
+
+export async function fetchQuestions(catalog?: string): Promise<QuizItem[]> {
   const res = await fetch(CSV_URL, { next: { revalidate: 60 } });
   if (!res.ok) {
     throw new Error(`Không tải được Google Sheet (HTTP ${res.status})`);
@@ -80,7 +100,14 @@ export async function fetchQuestions(): Promise<QuizItem[]> {
     skipEmptyLines: true,
   });
 
-  const rows = parsed.data.filter((r) => clean(r.Id));
+  const wantCatalog = catalog?.trim().toLowerCase();
+  const rows = parsed.data.filter((r) => {
+    if (!clean(r.Id)) return false;
+    if (wantCatalog && clean(r.Catalog).toLowerCase() !== wantCatalog) {
+      return false;
+    }
+    return true;
+  });
 
   // Gom câu con theo ParentId
   const childrenByParent = new Map<string, Answerable[]>();
