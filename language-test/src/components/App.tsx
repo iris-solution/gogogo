@@ -179,7 +179,8 @@ export default function App({ configs }: { configs: TestConfig[] }) {
   // Chưa có phiên -> trang bắt đầu
   if (!session) {
     return (
-      <div className="px-4 py-10">
+      <div className="relative px-4 py-10">
+        <MapBg />
         <StartForm configs={configs} onStart={onStart} />
       </div>
     );
@@ -210,7 +211,8 @@ export default function App({ configs }: { configs: TestConfig[] }) {
   ).length;
 
   return (
-    <div className="px-4 py-6">
+    <div className="relative px-4 py-6">
+      <MapBg />
       <div className="mx-auto max-w-2xl">
         {/* Thanh trên cùng */}
         <div className="sticky top-0 z-20 -mx-4 mb-5 overflow-hidden rounded-b-2xl border-b border-orange-100 bg-white/85 px-4 pb-3 pt-3.5 shadow-sm shadow-orange-100/50 backdrop-blur">
@@ -347,6 +349,22 @@ function ConfirmModal({
         </div>
       </div>
     </div>
+  );
+}
+
+// Nền bản đồ Việt Nam dùng chung cho trang chính và trang làm bài
+function MapBg() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 -z-10 bg-no-repeat opacity-[0.22]"
+      style={{
+        backgroundImage: "url('/images/Vietnam_map.png')",
+        backgroundSize: "auto 68%",
+        backgroundPosition: "65% center", 
+        filter: "brightness(0)",
+      }}
+    />
   );
 }
 

@@ -62,11 +62,12 @@ export default function QuizRunner({
         {q.options.map((opt) => {
           const picked = selected.includes(opt.key);
           const correct = q.correct.includes(opt.key);
-          let style = "border-zinc-200 bg-white hover:border-orange-300";
+          let style =
+            "border-zinc-200 bg-white/40 hover:border-orange-300 hover:bg-white/60";
           if (review) {
-            if (correct) style = "border-green-500 bg-green-50";
-            else if (picked) style = "border-red-400 bg-red-50";
-            else style = "border-zinc-200 bg-white";
+            if (correct) style = "border-green-500 bg-green-50/80";
+            else if (picked) style = "border-red-400 bg-red-50/80";
+            else style = "border-zinc-200 bg-white/40";
           } else if (picked) {
             style = "border-red-500 bg-red-50 ring-1 ring-red-200";
           }
@@ -119,7 +120,7 @@ export default function QuizRunner({
               ? correct
                 ? "border-green-500 bg-green-50"
                 : "border-red-400 bg-red-50"
-              : "border-zinc-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              : "border-zinc-300 bg-white/40 focus:border-orange-500 focus:bg-white/70 focus:ring-2 focus:ring-orange-100"
           }`}
         />
         {q.suggestions.length > 0 && !review && (
@@ -171,7 +172,7 @@ export default function QuizRunner({
       {items.map((item) => (
         <section
           key={item.id}
-          className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+          className="rounded-2xl border border-white/60 bg-white/35 p-5 shadow-sm backdrop-blur-sm transition hover:shadow-md"
         >
           {item.kind === "passage" ? (
             <div className="space-y-4">

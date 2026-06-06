@@ -64,7 +64,7 @@ export default function StartForm({ configs, onStart }: Props) {
 
   return (
     <div className="animate-[fadeInUp_0.5s_ease-out] mx-auto max-w-lg">
-      <div className="overflow-hidden rounded-3xl border border-orange-100/80 bg-white/95 shadow-2xl shadow-orange-200/50 backdrop-blur">
+      <div className="overflow-hidden rounded-3xl border border-white/60 bg-white/35 shadow-2xl shadow-orange-200/50 backdrop-blur-md">
         {/* Header: logo bo góc, có nền màu phía sau */}
         <div className="relative flex flex-col items-center bg-gradient-to-br from-orange-100 via-amber-50 to-red-100 px-8 pt-7 pb-6 text-center">
           <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-400" />
@@ -85,7 +85,7 @@ export default function StartForm({ configs, onStart }: Props) {
         </div>
 
         {/* Form */}
-        <div className="space-y-5 border-t border-zinc-100 px-8 py-7">
+        <div className="space-y-5 border-t border-white/40 px-8 py-7">
           <Field label="Họ và tên" required>
             <input
               value={name}
