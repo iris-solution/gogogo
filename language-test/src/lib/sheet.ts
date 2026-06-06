@@ -1,4 +1,5 @@
-import Papa from "papaparse";
+import "server-only";
+import { getSheetsClient, SPREADSHEET_ID } from "./google";
 import type {
   Answerable,
   Option,
@@ -7,12 +8,9 @@ import type {
   TestConfig,
 } from "./types";
 
-const SHEET_ID =
-  process.env.SHEET_ID ?? "17-7hAjXUFwTGYtfvyp0dyjoq0M3UZA0E6MNJWqrU-Cg";
-const SHEET_GID = process.env.SHEET_GID ?? "474156801";
-
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
-const CONFIG_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=config`;
+// Tab câu hỏi xác định theo gid; tab config theo tên.
+const QUESTIONS_GID = Number(process.env.SHEET_GID ?? "474156801");
+const CONFIG_SHEET = process.env.CONFIG_SHEET ?? "config";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
@@ -20,6 +18,46 @@ type Row = Record<string, string>;
 
 function clean(value: string | undefined): string {
   return (value ?? "").trim();
+}
+
+// Đổi lưới giá trị (hàng đầu là header) thành mảng object keyed theo header.
+function toRows(values: unknown[][] | null | undefined): Row[] {
+  const grid = values ?? [];
+  if (grid.length === 0) return [];
+  const header = (grid[0] ?? []).map((h) => String(h ?? "").trim());
+  return grid.slice(1).map((cells) => {
+    const obj: Row = {};
+    header.forEach((key, i) => {
+      if (key) obj[key] = cells?.[i] != null ? String(cells[i]) : "";
+    });
+    return obj;
+  });
+}
+
+// Đọc toàn bộ giá trị của một tab (range = tên tab) qua service account.
+async function getValues(range: string): Promise<Row[]> {
+  const sheets = getSheetsClient();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range,
+  });
+  return toRows(res.data.values as unknown[][] | undefined);
+}
+
+// Tìm tên tab câu hỏi theo gid (Sheets API dùng tên tab, không dùng gid trực tiếp).
+async function questionsSheetTitle(): Promise<string> {
+  const sheets = getSheetsClient();
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+  const found = meta.data.sheets?.find(
+    (s) => s.properties?.sheetId === QUESTIONS_GID,
+  );
+  const title = found?.properties?.title;
+  if (!title) {
+    throw new Error(
+      `Không tìm thấy tab câu hỏi (gid=${QUESTIONS_GID}). Kiểm tra SHEET_GID và quyền chia sẻ cho service account.`,
+    );
+  }
+  return title;
 }
 
 // Tách chuỗi letter đúng: hỗ trợ cả "," và "|"  (vd "A,B,C" hoặc "A|B")
@@ -75,13 +113,8 @@ function makeAnswerable(row: Row): Answerable {
 
 // Đọc danh sách bài test từ tab `config`: Language | Catalog | Title | TimeLimit
 export async function fetchConfig(): Promise<TestConfig[]> {
-  const res = await fetch(CONFIG_CSV_URL, { next: { revalidate: 60 } });
-  if (!res.ok) {
-    throw new Error(`Không tải được tab config (HTTP ${res.status})`);
-  }
-  const csv = await res.text();
-  const parsed = Papa.parse<Row>(csv, { header: true, skipEmptyLines: true });
-  return parsed.data
+  const rows = await getValues(CONFIG_SHEET);
+  return rows
     .map((r) => ({
       language: clean(r.Language),
       catalog: clean(r.Catalog),
@@ -92,18 +125,11 @@ export async function fetchConfig(): Promise<TestConfig[]> {
 }
 
 export async function fetchQuestions(catalog?: string): Promise<QuizItem[]> {
-  const res = await fetch(CSV_URL, { next: { revalidate: 60 } });
-  if (!res.ok) {
-    throw new Error(`Không tải được Google Sheet (HTTP ${res.status})`);
-  }
-  const csv = await res.text();
-  const parsed = Papa.parse<Row>(csv, {
-    header: true,
-    skipEmptyLines: true,
-  });
+  const title = await questionsSheetTitle();
+  const allRows = await getValues(title);
 
   const wantCatalog = catalog?.trim().toLowerCase();
-  const rows = parsed.data.filter((r) => {
+  const rows = allRows.filter((r) => {
     if (!clean(r.Id)) return false;
     if (wantCatalog && clean(r.Catalog).toLowerCase() !== wantCatalog) {
       return false;
