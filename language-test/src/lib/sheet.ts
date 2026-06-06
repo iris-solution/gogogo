@@ -40,7 +40,9 @@ function buildOptions(row: Row): Option[] {
 }
 
 function getMedia(row: Row): string | undefined {
-  return clean(row.Media) || clean(row.MediaUrl) || undefined;
+  const raw = clean(row.Media) || clean(row.MediaUrl);
+  // Chỉ coi là media khi là URL thật, tránh chữ rác (vd "-", "N/A") biến thành link.
+  return /^https?:\/\//i.test(raw) ? raw : undefined;
 }
 
 function makeAnswerable(row: Row): Answerable {

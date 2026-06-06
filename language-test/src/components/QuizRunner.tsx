@@ -10,7 +10,7 @@ import type {
   QuizItem,
 } from "@/lib/types";
 import { flatten, isCorrect } from "@/lib/quiz";
-import YouTubeEmbed from "./YouTubeEmbed";
+import Media from "./Media";
 
 interface Props {
   items: QuizItem[];
@@ -155,7 +155,7 @@ export default function QuizRunner({
           <span className="shrink-0 font-bold text-red-600">Câu {num}.</span>
           <span className="font-medium text-zinc-900">{q.question}</span>
         </div>
-        {q.media && <YouTubeEmbed url={q.media} />}
+        {q.media && <Media url={q.media} />}
         {q.kind === "choice" ? renderChoice(q) : renderFill(q)}
         {review && q.description && (
           <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -183,7 +183,7 @@ export default function QuizRunner({
                   {renderPassage(item.question)}
                 </p>
               </div>
-              {item.media && <YouTubeEmbed url={item.media} />}
+              {item.media && <Media url={item.media} />}
               <div className="space-y-5">
                 {item.children.map((c) => renderAnswerable(c, true))}
               </div>
