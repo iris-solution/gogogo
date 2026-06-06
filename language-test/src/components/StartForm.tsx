@@ -77,7 +77,7 @@ export default function StartForm({ configs, onStart }: Props) {
             className="h-auto w-auto max-w-full rounded-xl"
           />
           <h1 className="mt-4 text-2xl font-bold text-zinc-900">
-            Bài kiểm tra ngôn ngữ
+            Bài kiểm tra tổng hợp
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
             Nhập thông tin và chọn bài test để bắt đầu.
