@@ -134,7 +134,7 @@ export default function QuizRunner({
           <p className="text-sm">
             Đáp án đúng:{" "}
             <span className="font-semibold text-green-700">
-              {q.accepted.join(" / ")}
+              {q.accepted.length > 0 ? q.accepted.join(" / ") : "(để trống)"}
             </span>
           </p>
         )}

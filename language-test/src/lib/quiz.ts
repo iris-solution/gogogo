@@ -33,10 +33,14 @@ export function isCorrect(
   fill: FillAnswers,
 ): boolean {
   if (q.kind === "choice") {
+    // Câu chọn: không chọn -> luôn sai (kể cả khi sheet quên khai báo đáp án).
+    if ((choice[q.id]?.length ?? 0) === 0) return false;
     return sameSet(choice[q.id] ?? [], q.correct);
   }
+  // Câu fill: so nội dung nhập với đáp án. Đáp án có thể rỗng -> "để trống" mới đúng.
   const typed = normalize(fill[q.id] ?? "");
-  return typed.length > 0 && q.accepted.some((a) => normalize(a) === typed);
+  const accepted = q.accepted.length > 0 ? q.accepted : [""];
+  return accepted.some((a) => normalize(a) === typed);
 }
 
 export function isAnswered(
