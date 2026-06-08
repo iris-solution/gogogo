@@ -1,9 +1,9 @@
 import "server-only";
 import { getSheetsClient, SPREADSHEET_ID } from "./google";
-import type { TestResult } from "./types";
+import type { EssayGrade, TestResult } from "./types";
 
-// Cột tab {LANG}-Responses (6 cột đầu giữ tương thích định dạng sẵn có):
-// Timestamp | Name | Test | Score | Percent | Duration | Email | Language | Details
+// Cột tab {LANG}-Responses:
+// Timestamp | Name | Test | Score | Percent | Duration | Email | Language | Details | Essay
 const HEADERS = [
   "Timestamp",
   "Name",
@@ -14,7 +14,26 @@ const HEADERS = [
   "Email",
   "Language",
   "Details",
+  "Essay",
 ];
+
+// Gộp các câu tự luận (nội dung trả lời + nhận xét AI) thành một ô đọc được.
+function formatEssays(essays: EssayGrade[]): string {
+  return essays
+    .map((e) => {
+      const lines = [
+        `Câu: ${e.question}`,
+        `Trả lời: ${e.answer || "(bỏ trống)"}`,
+      ];
+      if (e.graded) {
+        lines.push(`AI (${e.pass ? "Đạt" : "Chưa đạt"}): ${e.comment ?? ""}`);
+      } else if (e.comment) {
+        lines.push(`Ghi chú: ${e.comment}`);
+      }
+      return lines.join("\n");
+    })
+    .join("\n\n———\n\n");
+}
 
 function responseSheetName(language: string): string {
   return `${(language || "ENG").trim()}-Responses`;
@@ -91,6 +110,7 @@ export interface SubmitParams {
   email: string;
   test: string; // catalog
   result: TestResult;
+  essays?: EssayGrade[]; // câu tự luận đã (hoặc chưa) chấm AI
 }
 
 export async function appendResult({
@@ -99,6 +119,7 @@ export async function appendResult({
   email,
   test,
   result,
+  essays = [],
 }: SubmitParams): Promise<void> {
   const sheets = getSheetsClient();
   const title = await ensureResponseSheet(language);
@@ -112,10 +133,11 @@ export async function appendResult({
     email,
     language,
     JSON.stringify(result.perQuestion),
+    essays.length > 0 ? formatEssays(essays) : "",
   ];
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${title}!A:I`,
+    range: `${title}!A:J`,
     valueInputOption: "USER_ENTERED",
     insertDataOption: "INSERT_ROWS",
     requestBody: { values: [row] },

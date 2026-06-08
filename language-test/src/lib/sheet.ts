@@ -20,6 +20,13 @@ function clean(value: string | undefined): string {
   return (value ?? "").trim();
 }
 
+// Cờ bật/tắt dạng văn bản trong sheet -> boolean (true/1/yes/x/có).
+function parseBool(value: string | undefined): boolean {
+  return ["true", "1", "yes", "x", "có", "co"].includes(
+    clean(value).toLowerCase(),
+  );
+}
+
 // Đổi lưới giá trị (hàng đầu là header) thành mảng object keyed theo header.
 function toRows(values: unknown[][] | null | undefined): Row[] {
   const grid = values ?? [];
@@ -93,14 +100,15 @@ function makeAnswerable(row: Row): Answerable {
     description: clean(row.Descriptions) || undefined,
   };
 
-  if (type === "FillBlank") {
+  if (type === "FillBlank" || type === "Essay") {
     const accepted = clean(row.CorrectAnswer)
       .split(/[|/]/)
       .map((s) => s.trim())
       .filter(Boolean);
     // Giữ nguyên văn nội dung gợi ý đúng như trong sheet (không tách).
     const suggestion = clean(row.SuggestionAnswer);
-    return { ...base, kind: "fill", accepted, suggestion };
+    const long = type === "Essay";
+    return { ...base, kind: "fill", accepted, suggestion, long };
   }
 
   const options = buildOptions(row);
@@ -118,6 +126,7 @@ export async function fetchConfig(): Promise<TestConfig[]> {
       catalog: clean(r.Catalog),
       title: clean(r.Title),
       timeLimitMin: Number(clean(r.TimeLimit)) || 0,
+      enableAI: parseBool(r.EnableAI),
     }))
     .filter((c) => c.language && c.catalog);
 }

@@ -107,37 +107,56 @@ export default function QuizRunner({
 
   function renderFill(q: FillQuestion) {
     const value = fill[q.id] ?? "";
-    const correct = review && isCorrect(q, choice, fill);
+    const isEssay = Boolean(q.long);
+    // Câu tự luận không tự chấm -> không tô xanh/đỏ khi xem lại.
+    const correct = review && !isEssay && isCorrect(q, choice, fill);
+    const stateClass = !review
+      ? "border-zinc-300 bg-white/40 focus:border-orange-500 focus:bg-white/70 focus:ring-2 focus:ring-orange-100"
+      : isEssay
+        ? "border-zinc-300 bg-white/40"
+        : correct
+          ? "border-green-500 bg-green-50"
+          : "border-red-400 bg-red-50";
     return (
       <div className="space-y-2">
-        <input
-          type="text"
-          value={value}
-          disabled={review}
-          onChange={(e) => onFill?.(q.id, e.target.value)}
-          placeholder="Nhập đáp án..."
-          className={`w-full max-w-sm rounded-xl border px-3 py-2 outline-none transition ${
-            review
-              ? correct
-                ? "border-green-500 bg-green-50"
-                : "border-red-400 bg-red-50"
-              : "border-zinc-300 bg-white/40 focus:border-orange-500 focus:bg-white/70 focus:ring-2 focus:ring-orange-100"
-          }`}
-        />
+        {q.long ? (
+          <textarea
+            value={value}
+            disabled={review}
+            onChange={(e) => onFill?.(q.id, e.target.value)}
+            placeholder="Nhập câu trả lời..."
+            rows={5}
+            className={`w-full resize-y rounded-xl border px-3 py-2 outline-none transition ${stateClass}`}
+          />
+        ) : (
+          <input
+            type="text"
+            value={value}
+            disabled={review}
+            onChange={(e) => onFill?.(q.id, e.target.value)}
+            placeholder="Nhập đáp án..."
+            className={`w-full max-w-sm rounded-xl border px-3 py-2 outline-none transition ${stateClass}`}
+          />
+        )}
         {q.suggestion && !review && (
           <p className="flex items-start gap-1.5 text-sm text-amber-700">
             <FcIdea className="mt-0.5 h-4 w-4 shrink-0" />
             <span className="whitespace-pre-line">{q.suggestion}</span>
           </p>
         )}
-        {review && (
-          <p className="text-sm">
-            Đáp án đúng:{" "}
-            <span className="font-semibold text-green-700">
-              {q.accepted.length > 0 ? q.accepted.join(" / ") : "(để trống)"}
-            </span>
-          </p>
-        )}
+        {review &&
+          (isEssay ? (
+            <p className="text-sm text-zinc-500">
+              📝 Câu tự luận — câu trả lời được chấm riêng (AI hoặc giáo viên).
+            </p>
+          ) : (
+            <p className="text-sm">
+              Đáp án đúng:{" "}
+              <span className="font-semibold text-green-700">
+                {q.accepted.length > 0 ? q.accepted.join(" / ") : "(để trống)"}
+              </span>
+            </p>
+          ))}
       </div>
     );
   }

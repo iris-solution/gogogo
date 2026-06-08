@@ -1,7 +1,9 @@
 import type {
   Answerable,
   ChoiceAnswers,
+  EssayAnswer,
   FillAnswers,
+  FillQuestion,
   PerQuestionResult,
   QuizItem,
   TestResult,
@@ -67,15 +69,31 @@ export function computeResult(
   endAt: number,
 ): TestResult {
   const answerables = flatten(items);
-  const perQuestion: PerQuestionResult[] = answerables.map((q) => ({
+  // Câu tự luận (Essay) tách riêng, không tính vào điểm tự động.
+  const isEssay = (q: Answerable) => q.kind === "fill" && Boolean(q.long);
+  const gradables = answerables.filter((q) => !isEssay(q));
+
+  const perQuestion: PerQuestionResult[] = gradables.map((q) => ({
     id: q.id,
     question: q.question,
     correct: isCorrect(q, choice, fill),
   }));
   const score = perQuestion.filter((p) => p.correct).length;
-  const total = answerables.length;
+  const total = gradables.length;
   const percent = total > 0 ? Math.round((score / total) * 100) : 0;
   const durationSec = Math.max(0, Math.round((endAt - startAt) / 1000));
+
+  const essays: EssayAnswer[] = answerables.filter(isEssay).map((q) => {
+    const fq = q as FillQuestion;
+    return {
+      id: fq.id,
+      question: fq.question,
+      answer: (fill[fq.id] ?? "").trim(),
+      modelAnswer: fq.accepted.length > 0 ? fq.accepted.join(" / ") : undefined,
+      suggestion: fq.suggestion || undefined,
+    };
+  });
+
   return {
     score,
     total,
@@ -84,5 +102,6 @@ export function computeResult(
     durationText: formatDuration(durationSec),
     submittedAt: endAt,
     perQuestion,
+    essays,
   };
 }
