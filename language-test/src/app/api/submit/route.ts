@@ -46,9 +46,19 @@ export async function POST(req: NextRequest) {
           answers.map(async (e) => {
             try {
               const g = await gradeEssay(e);
-              return { ...e, graded: true, pass: g.pass, comment: g.comment };
+              return {
+                ...e,
+                graded: true,
+                pass: g.pass,
+                score: g.score,
+                comment: g.comment,
+              };
             } catch (err) {
-              return { ...e, graded: false, comment: `AI lỗi: ${String(err)}` };
+              return {
+                ...e,
+                graded: false,
+                comment: `AI error: ${String(err)}`,
+              };
             }
           }),
         );

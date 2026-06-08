@@ -41,21 +41,32 @@ export function isAIConfigured(): boolean {
 
 export interface EssayGradeResult {
   pass: boolean;
-  comment: string;
+  score: number; // 0-10
+  comment: string; // nhận xét đã gộp theo từng tiêu chí
 }
 
-const SYSTEM_PROMPT =
-  "Bạn là giám khảo chấm câu trả lời tự luận. Đánh giá câu trả lời của thí sinh " +
-  "dựa trên câu hỏi (và đáp án mẫu nếu có). CHỈ trả về một JSON hợp lệ dạng " +
-  '{"pass": boolean, "comment": string}. "pass" = true nếu câu trả lời đạt yêu cầu. ' +
-  '"comment" là nhận xét ngắn gọn bằng tiếng Việt (1-3 câu), nêu điểm tốt và điểm cần cải thiện.';
+const SYSTEM_PROMPT = `You are an examiner grading a candidate's free-text (essay) answer. Grade the answer in relation to the question and the passage/answer provided (and the model answer if given). Assess the answer against THESE CRITERIA:
+- Vocabulary: range, accuracy and appropriateness of word choice.
+- Grammar and Sentence Structure: grammatical accuracy, sentence construction, punctuation.
+- Clarity/Conciseness: how clear, well-organized and concise the answer is, and whether it stays on topic.
+
+Return ONLY ONE valid JSON object, with no text outside the JSON, in EXACTLY this shape:
+{
+  "pass": boolean,        // true if the answer meets the minimum requirements
+  "score": number,        // overall score from 0 to 10
+  "vocabulary": string,   // feedback on vocabulary
+  "grammar": string,      // feedback on grammar and sentence structure
+  "clarity": string,      // feedback on clarity/conciseness
+  "overall": string       // overall comment and concrete suggestions for improvement
+}
+Write ALL feedback in English — concise, specific and constructive. If the answer is blank, gibberish or irrelevant to the question, set score=0, pass=false and state clearly that the candidate did not answer the question.`;
 
 function buildUserPrompt(input: EssayAnswer): string {
   return [
-    `Câu hỏi: ${input.question}`,
-    input.modelAnswer ? `Đáp án mẫu: ${input.modelAnswer}` : "",
-    input.suggestion ? `Gợi ý: ${input.suggestion}` : "",
-    `Câu trả lời của thí sinh: ${input.answer || "(bỏ trống)"}`,
+    `Question: ${input.question}`,
+    input.modelAnswer ? `Model answer: ${input.modelAnswer}` : "",
+    input.suggestion ? `Hint: ${input.suggestion}` : "",
+    `Candidate's answer: ${input.answer || "(blank)"}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -66,21 +77,39 @@ function extractJson(s: string): string {
   return m ? m[0] : s;
 }
 
+function clampScore(v: unknown): number {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(10, Math.round(n * 10) / 10));
+}
+
 function parseGrade(content: string): EssayGradeResult {
   try {
-    const obj = JSON.parse(extractJson(content)) as {
-      pass?: unknown;
-      comment?: unknown;
+    const o = JSON.parse(extractJson(content)) as Record<string, unknown>;
+    const line = (label: string, v: unknown) => {
+      const t = String(v ?? "").trim();
+      return t ? `• ${label}: ${t}` : "";
     };
+    const overall = String(o.overall ?? "").trim();
+    const comment = [
+      line("Vocabulary", o.vocabulary),
+      line("Grammar & Sentence Structure", o.grammar),
+      line("Clarity & Conciseness", o.clarity),
+      overall ? `→ ${overall}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
     return {
-      pass: Boolean(obj.pass),
-      comment: String(obj.comment ?? "").trim(),
+      pass: Boolean(o.pass),
+      score: clampScore(o.score),
+      comment: comment || String(o.comment ?? "").trim(),
     };
   } catch {
     return {
       pass: false,
+      score: 0,
       comment:
-        content.trim().slice(0, 500) || "Không phân tích được phản hồi AI.",
+        content.trim().slice(0, 500) || "Could not parse AI response.",
     };
   }
 }
@@ -89,40 +118,48 @@ export async function gradeEssay(
   input: EssayAnswer,
 ): Promise<EssayGradeResult> {
   const key = process.env.AI_API_KEY;
-  if (!key) throw new Error("Chưa cấu hình AI_API_KEY");
+  if (!key) throw new Error("AI_API_KEY is not configured");
 
   const pid = providerId();
   const cfg = PROVIDERS[pid];
   const baseUrl = (process.env.AI_BASE_URL ?? cfg.baseUrl).replace(/\/$/, "");
   const model = process.env.AI_MODEL || cfg.defaultModel;
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(input) },
-      ],
-    }),
+  const body = JSON.stringify({
+    model,
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: buildUserPrompt(input) },
+    ],
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `AI provider ${pid} lỗi HTTP ${res.status}: ${text.slice(0, 200)}`,
-    );
-  }
+  // Retry on transient errors (429 rate limit, 5xx overloaded) with backoff.
+  const maxAttempts = 3;
+  let lastErr = "";
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body,
+    });
 
-  const data = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const content = data.choices?.[0]?.message?.content ?? "";
-  return parseGrade(content);
+    if (res.ok) {
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      return parseGrade(data.choices?.[0]?.message?.content ?? "");
+    }
+
+    const text = await res.text().catch(() => "");
+    lastErr = `AI provider ${pid} HTTP error ${res.status}: ${text.slice(0, 200)}`;
+    const transient = res.status === 429 || res.status >= 500;
+    if (!transient || attempt === maxAttempts) break;
+    await new Promise((r) => setTimeout(r, 800 * attempt));
+  }
+  throw new Error(lastErr);
 }

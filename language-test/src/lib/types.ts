@@ -83,6 +83,7 @@ export interface EssayAnswer {
 export interface EssayGrade extends EssayAnswer {
   graded: boolean; // AI đã chấm chưa
   pass?: boolean; // AI: đạt / chưa đạt
+  score?: number; // AI: điểm 0-10
   comment?: string; // nhận xét
 }
 

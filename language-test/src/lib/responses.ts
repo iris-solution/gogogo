@@ -17,18 +17,21 @@ const HEADERS = [
   "Essay",
 ];
 
-// Gộp các câu tự luận (nội dung trả lời + nhận xét AI) thành một ô đọc được.
+// Merge essay questions (answer + AI feedback) into one readable cell. English only.
 function formatEssays(essays: EssayGrade[]): string {
   return essays
     .map((e) => {
       const lines = [
-        `Câu: ${e.question}`,
-        `Trả lời: ${e.answer || "(bỏ trống)"}`,
+        `Question: ${e.question}`,
+        `Answer: ${e.answer || "(blank)"}`,
       ];
       if (e.graded) {
-        lines.push(`AI (${e.pass ? "Đạt" : "Chưa đạt"}): ${e.comment ?? ""}`);
+        const score = typeof e.score === "number" ? ` ${e.score}/10` : "";
+        lines.push(
+          `AI (${e.pass ? "Pass" : "Fail"}${score}): ${e.comment ?? ""}`,
+        );
       } else if (e.comment) {
-        lines.push(`Ghi chú: ${e.comment}`);
+        lines.push(`Note: ${e.comment}`);
       }
       return lines.join("\n");
     })
