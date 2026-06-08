@@ -22,8 +22,8 @@ function formatEssays(essays: EssayGrade[]): string {
   return essays
     .map((e) => {
       const lines = [
-        `Question: ${e.question}`,
-        `Answer: ${e.answer || "(blank)"}`,
+        `Question: "${e.question}"`,
+        `Answer: "${e.answer || "(blank)"}"`,
       ];
       if (e.graded) {
         const score = typeof e.score === "number" ? ` ${e.score}/10` : "";
