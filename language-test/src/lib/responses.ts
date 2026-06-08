@@ -47,19 +47,44 @@ async function ensureResponseSheet(language: string): Promise<string> {
   const sheets = getSheetsClient();
   const title = responseSheetName(language);
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-  const exists = meta.data.sheets?.some(
-    (s) => s.properties?.title === title,
-  );
-  if (!exists) {
-    await sheets.spreadsheets.batchUpdate({
+  let sheet = meta.data.sheets?.find((s) => s.properties?.title === title);
+
+  if (!sheet) {
+    const created = await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
       requestBody: { requests: [{ addSheet: { properties: { title } } }] },
     });
+    sheet = created.data.replies?.[0]?.addSheet ?? undefined;
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
       range: `${title}!A1`,
       valueInputOption: "RAW",
       requestBody: { values: [HEADERS] },
+    });
+  }
+
+  // Tắt "tràn chữ" của Google Sheets ở cột Essay: đặt wrap = CLIP để nội dung
+  // dài không lan sang ô khác (vẫn xem đủ khi click vào ô).
+  const sheetId = sheet?.properties?.sheetId;
+  const essayCol = HEADERS.indexOf("Essay");
+  if (sheetId != null && essayCol >= 0) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      requestBody: {
+        requests: [
+          {
+            repeatCell: {
+              range: {
+                sheetId,
+                startColumnIndex: essayCol,
+                endColumnIndex: essayCol + 1,
+              },
+              cell: { userEnteredFormat: { wrapStrategy: "CLIP" } },
+              fields: "userEnteredFormat.wrapStrategy",
+            },
+          },
+        ],
+      },
     });
   }
   return title;
