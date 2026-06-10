@@ -32,6 +32,19 @@ body::before {
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 80%);
 }
 
+/* Chống gian lận: cấm bôi đen/copy nội dung bài thi, nhưng vẫn cho nhập đáp án */
+.no-copy {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.no-copy input,
+.no-copy textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
 .input {
   width: 100%;
   border-radius: 0.75rem;

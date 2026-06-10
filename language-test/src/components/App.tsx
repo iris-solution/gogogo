@@ -21,6 +21,11 @@ const LANG_LABEL: Record<string, string> = {
   VN: "Tiếng Việt",
 };
 
+// Chặn sao chép / cắt / dán / chuột phải / kéo-thả khi đang làm bài.
+function blockClipboard(e: React.SyntheticEvent) {
+  e.preventDefault();
+}
+
 export default function App({ configs }: { configs: TestConfig[] }) {
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
@@ -214,7 +219,14 @@ export default function App({ configs }: { configs: TestConfig[] }) {
   ).length;
 
   return (
-    <div className="relative px-4 py-6">
+    <div
+      className="no-copy relative px-4 py-6"
+      onCopy={blockClipboard}
+      onCut={blockClipboard}
+      onPaste={blockClipboard}
+      onContextMenu={blockClipboard}
+      onDragStart={blockClipboard}
+    >
       <MapBg />
       <div className="mx-auto max-w-2xl">
         {/* Thanh trên cùng */}
