@@ -4,9 +4,9 @@ import { fetchQuestions } from "@/lib/sheet";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const catalog = req.nextUrl.searchParams.get("catalog") ?? "";
+  const sheet = req.nextUrl.searchParams.get("sheet") ?? "";
   try {
-    const items = await fetchQuestions(catalog || undefined);
+    const items = await fetchQuestions(sheet || undefined);
     return NextResponse.json({ ok: true, items });
   } catch (err) {
     return NextResponse.json(

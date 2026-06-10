@@ -38,14 +38,15 @@ function formatEssays(essays: EssayGrade[]): string {
     .join("\n\n———\n\n");
 }
 
-function responseSheetName(language: string): string {
-  return `${(language || "ENG").trim()}-Responses`;
+// Tên tab lưu kết quả theo catalog: {CATALOG}-Responses (vd PT2-Responses).
+function responseSheetName(catalog: string): string {
+  return `${(catalog || "TEST").trim()}-Responses`;
 }
 
-// Bảo đảm tab {LANG}-Responses tồn tại, tạo mới + header nếu chưa có.
-async function ensureResponseSheet(language: string): Promise<string> {
+// Bảo đảm tab {CATALOG}-Responses tồn tại, tạo mới + header nếu chưa có.
+async function ensureResponseSheet(catalog: string): Promise<string> {
   const sheets = getSheetsClient();
-  const title = responseSheetName(language);
+  const title = responseSheetName(catalog);
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
   let sheet = meta.data.sheets?.find((s) => s.properties?.title === title);
 
@@ -99,13 +100,12 @@ export interface CheckParams {
 
 // Đã làm bài = cùng test và (cùng email, hoặc cùng name nếu không nhập email)
 export async function hasResponse({
-  language,
   test,
   email,
   name,
 }: CheckParams): Promise<boolean> {
   const sheets = getSheetsClient();
-  const title = responseSheetName(language);
+  const title = responseSheetName(test);
   let rows: string[][] = [];
   try {
     const res = await sheets.spreadsheets.values.get({
@@ -150,7 +150,7 @@ export async function appendResult({
   essays = [],
 }: SubmitParams): Promise<void> {
   const sheets = getSheetsClient();
-  const title = await ensureResponseSheet(language);
+  const title = await ensureResponseSheet(test);
   const row = [
     new Date().toLocaleString("vi-VN"),
     name,

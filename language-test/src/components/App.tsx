@@ -39,7 +39,8 @@ export default function App({ configs }: { configs: TestConfig[] }) {
   useEffect(() => {
     if (!session || items || loadingItems) return;
     setLoadingItems(true);
-    fetch(`/api/questions?catalog=${encodeURIComponent(session.config.catalog)}`)
+    const sheet = session.config.questionSheet || session.config.catalog;
+    fetch(`/api/questions?sheet=${encodeURIComponent(sheet)}`)
       .then((r) => r.json())
       .then((j) => setItems(j.items ?? []))
       .catch(() => setItems([]))

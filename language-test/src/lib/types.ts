@@ -46,10 +46,12 @@ export interface PassageQuestion extends Base {
 
 export type QuizItem = Answerable | PassageQuestion;
 
-// Một bài test lấy từ tab `config`: Language | Catalog | Title | TimeLimit | EnableAI
+// Một bài test lấy từ tab `config`:
+// Language | Catalog | QuestionSheet | Title | TimeLimit | EnableAI
 export interface TestConfig {
   language: string; // mã ngôn ngữ, vd ENG, CN
-  catalog: string; // nhóm câu hỏi, vd TOIEC, HSK1
+  catalog: string; // mã bài test, vd TOIEC1, PT2
+  questionSheet: string; // tên tab chứa câu hỏi của bài này, vd ENG, PT2
   title: string; // tên hiển thị của bài, vd TEST
   timeLimitMin: number; // giới hạn thời gian (phút)
   enableAI: boolean; // true = tự động chấm câu tự luận bằng AI

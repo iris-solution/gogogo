@@ -121,28 +121,29 @@ function makeAnswerable(row: Row): Answerable {
 export async function fetchConfig(): Promise<TestConfig[]> {
   const rows = await getValues(CONFIG_SHEET);
   return rows
-    .map((r) => ({
-      language: clean(r.Language),
-      catalog: clean(r.Catalog),
-      title: clean(r.Title),
-      timeLimitMin: Number(clean(r.TimeLimit)) || 0,
-      enableAI: parseBool(r.EnableAI),
-    }))
+    .map((r) => {
+      const catalog = clean(r.Catalog);
+      return {
+        language: clean(r.Language),
+        catalog,
+        // QuestionSheet: tab chứa câu hỏi; mặc định trùng tên catalog nếu để trống.
+        questionSheet: clean(r.QuestionSheet) || catalog,
+        title: clean(r.Title),
+        timeLimitMin: Number(clean(r.TimeLimit)) || 0,
+        enableAI: parseBool(r.EnableAI),
+      };
+    })
     .filter((c) => c.language && c.catalog);
 }
 
-export async function fetchQuestions(catalog?: string): Promise<QuizItem[]> {
-  const title = await questionsSheetTitle();
+// Đọc câu hỏi từ tab `sheet` (mỗi bài test = 1 tab riêng, đặt ở cột QuestionSheet
+// trong config). Nếu không truyền sheet, fallback về tab theo gid (SHEET_GID).
+export async function fetchQuestions(sheet?: string): Promise<QuizItem[]> {
+  const title = clean(sheet) || (await questionsSheetTitle());
   const allRows = await getValues(title);
 
-  const wantCatalog = catalog?.trim().toLowerCase();
-  const rows = allRows.filter((r) => {
-    if (!clean(r.Id)) return false;
-    if (wantCatalog && clean(r.Catalog).toLowerCase() !== wantCatalog) {
-      return false;
-    }
-    return true;
-  });
+  // Tab dành riêng cho bài test -> lấy mọi dòng có Id, không lọc theo Catalog.
+  const rows = allRows.filter((r) => Boolean(clean(r.Id)));
 
   // Gom câu con theo ParentId
   const childrenByParent = new Map<string, Answerable[]>();
