@@ -8,8 +8,6 @@ import type {
   TestConfig,
 } from "./types";
 
-// Tab câu hỏi xác định theo gid; tab config theo tên.
-const QUESTIONS_GID = Number(process.env.SHEET_GID ?? "474156801");
 const CONFIG_SHEET = process.env.CONFIG_SHEET ?? "config";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -57,20 +55,25 @@ async function getValues(sheetName: string): Promise<Row[]> {
   return toRows(res.data.values as unknown[][] | undefined);
 }
 
-// Tìm tên tab câu hỏi theo gid (Sheets API dùng tên tab, không dùng gid trực tiếp).
-async function questionsSheetTitle(): Promise<string> {
+// Liệt kê tên tất cả các tab trong spreadsheet.
+async function listSheetTitles(): Promise<string[]> {
   const sheets = getSheetsClient();
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-  const found = meta.data.sheets?.find(
-    (s) => s.properties?.sheetId === QUESTIONS_GID,
-  );
-  const title = found?.properties?.title;
-  if (!title) {
-    throw new Error(
-      `Không tìm thấy tab câu hỏi (gid=${QUESTIONS_GID}). Kiểm tra SHEET_GID và quyền chia sẻ cho service account.`,
-    );
+  return (meta.data.sheets ?? [])
+    .map((s) => s.properties?.title ?? "")
+    .filter(Boolean);
+}
+
+// Chọn tab tồn tại đầu tiên trong danh sách ứng viên (so khớp không phân biệt hoa/thường).
+function pickExisting(titles: string[], candidates: string[]): string | undefined {
+  const lower = titles.map((t) => t.toLowerCase());
+  for (const c of candidates) {
+    const name = clean(c);
+    if (!name) continue;
+    const i = lower.indexOf(name.toLowerCase());
+    if (i >= 0) return titles[i];
   }
-  return title;
+  return undefined;
 }
 
 // Tách chuỗi letter đúng: hỗ trợ cả "," và "|"  (vd "A,B,C" hoặc "A|B")
@@ -142,10 +145,20 @@ export async function fetchConfig(): Promise<TestConfig[]> {
     .filter((c) => c.language && c.catalog);
 }
 
-// Đọc câu hỏi từ tab `sheet` (mỗi bài test = 1 tab riêng, đặt ở cột QuestionSheet
-// trong config). Nếu không truyền sheet, fallback về tab theo gid (SHEET_GID).
-export async function fetchQuestions(sheet?: string): Promise<QuizItem[]> {
-  const title = clean(sheet) || (await questionsSheetTitle());
+// Đọc câu hỏi cho 1 bài test. Mỗi bài = 1 tab riêng, tên tab = Catalog
+// (ưu tiên), nếu không có thì thử cột QuestionSheet. So khớp tên tab linh hoạt.
+export async function fetchQuestions(
+  catalog?: string,
+  questionSheet?: string,
+): Promise<QuizItem[]> {
+  const titles = await listSheetTitles();
+  const title = pickExisting(titles, [catalog ?? "", questionSheet ?? ""]);
+  if (!title) {
+    const want = clean(catalog) || clean(questionSheet);
+    throw new Error(
+      `Không tìm thấy tab câu hỏi tên "${want}". Hãy tạo một tab có tên trùng Catalog (vd ${want}).`,
+    );
+  }
   const allRows = await getValues(title);
 
   // Tab dành riêng cho bài test -> lấy mọi dòng có Id, không lọc theo Catalog.

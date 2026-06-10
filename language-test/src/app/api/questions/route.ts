@@ -4,9 +4,11 @@ import { fetchQuestions } from "@/lib/sheet";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const sheet = req.nextUrl.searchParams.get("sheet") ?? "";
+  const p = req.nextUrl.searchParams;
+  const catalog = p.get("catalog") ?? "";
+  const sheet = p.get("sheet") ?? "";
   try {
-    const items = await fetchQuestions(sheet || undefined);
+    const items = await fetchQuestions(catalog || undefined, sheet || undefined);
     return NextResponse.json({ ok: true, items });
   } catch (err) {
     return NextResponse.json(
