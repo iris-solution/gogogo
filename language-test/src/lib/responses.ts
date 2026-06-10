@@ -1,5 +1,6 @@
 import "server-only";
 import { getSheetsClient, SPREADSHEET_ID } from "./google";
+import { quoteSheet } from "./sheet";
 import type { EssayGrade, TestResult } from "./types";
 
 // Cột tab {LANG}-Responses:
@@ -58,7 +59,7 @@ async function ensureResponseSheet(catalog: string): Promise<string> {
     sheet = created.data.replies?.[0]?.addSheet ?? undefined;
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${title}!A1`,
+      range: `${quoteSheet(title)}!A1`,
       valueInputOption: "RAW",
       requestBody: { values: [HEADERS] },
     });
@@ -110,7 +111,7 @@ export async function hasResponse({
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${title}!A:I`,
+      range: `${quoteSheet(title)}!A:I`,
     });
     rows = (res.data.values as string[][]) ?? [];
   } catch {
@@ -165,7 +166,7 @@ export async function appendResult({
   ];
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${title}!A:J`,
+    range: `${quoteSheet(title)}!A:J`,
     valueInputOption: "USER_ENTERED",
     insertDataOption: "INSERT_ROWS",
     requestBody: { values: [row] },

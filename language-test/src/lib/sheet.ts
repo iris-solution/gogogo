@@ -41,12 +41,18 @@ function toRows(values: unknown[][] | null | undefined): Row[] {
   });
 }
 
-// Đọc toàn bộ giá trị của một tab (range = tên tab) qua service account.
-async function getValues(range: string): Promise<Row[]> {
+// Bọc tên tab trong nháy đơn để tránh bị hiểu nhầm thành tham chiếu ô
+// (vd tab "PT2" -> cột PT dòng 2). Escape nháy đơn bằng cách nhân đôi.
+export function quoteSheet(name: string): string {
+  return `'${name.replace(/'/g, "''")}'`;
+}
+
+// Đọc toàn bộ giá trị của một tab qua service account.
+async function getValues(sheetName: string): Promise<Row[]> {
   const sheets = getSheetsClient();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range,
+    range: quoteSheet(sheetName),
   });
   return toRows(res.data.values as unknown[][] | undefined);
 }
