@@ -61,23 +61,48 @@ export default function App({ configs }: { configs: TestConfig[] }) {
 
   // ----- Bắt đầu làm bài -----
   const onStart = useCallback(
-    async (candidate: Candidate, config: TestConfig) => {
-      try {
-        const q = new URLSearchParams({
-          language: config.language,
-          test: config.catalog,
-          email: candidate.email,
-          name: candidate.name,
-        });
-        const res = await fetch(`/api/check?${q.toString()}`);
-        const j = await res.json();
-        if (j.exists) {
-          return {
-            error: "Bạn đã làm bài test này rồi, không thể làm lại.",
-          };
+    async (candidate: Candidate, config: TestConfig, password: string) => {
+      // Bài có đặt mật khẩu: bắt buộc gọi server kiểm tra; lỗi mạng -> chặn.
+      if (config.requirePassword) {
+        try {
+          const q = new URLSearchParams({
+            language: config.language,
+            test: config.catalog,
+            email: candidate.email,
+            name: candidate.name,
+            password,
+          });
+          const res = await fetch(`/api/check?${q.toString()}`);
+          const j = await res.json();
+          if (j.passwordOk === false) {
+            return { error: "Mật khẩu không đúng." };
+          }
+          if (j.exists) {
+            return {
+              error: "Bạn đã làm bài test này rồi, không thể làm lại.",
+            };
+          }
+        } catch {
+          return { error: "Không kiểm tra được mật khẩu, vui lòng thử lại." };
         }
-      } catch {
-        // Không chặn nếu việc kiểm tra lỗi mạng
+      } else {
+        try {
+          const q = new URLSearchParams({
+            language: config.language,
+            test: config.catalog,
+            email: candidate.email,
+            name: candidate.name,
+          });
+          const res = await fetch(`/api/check?${q.toString()}`);
+          const j = await res.json();
+          if (j.exists) {
+            return {
+              error: "Bạn đã làm bài test này rồi, không thể làm lại.",
+            };
+          }
+        } catch {
+          // Không chặn nếu việc kiểm tra lỗi mạng
+        }
       }
       const newSession: Session = {
         candidate,

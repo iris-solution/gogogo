@@ -127,6 +127,8 @@ function makeAnswerable(row: Row): Answerable {
 }
 
 // Đọc danh sách bài test từ tab `config`: Language | Catalog | Title | TimeLimit
+// LƯU Ý: cột Password chỉ dùng để suy ra cờ `requirePassword`; KHÔNG đưa mật khẩu
+// thật vào kết quả vì object này được truyền xuống client.
 export async function fetchConfig(): Promise<TestConfig[]> {
   const rows = await getValues(CONFIG_SHEET);
   return rows
@@ -140,9 +142,31 @@ export async function fetchConfig(): Promise<TestConfig[]> {
         title: clean(r.Title),
         timeLimitMin: Number(clean(r.TimeLimit)) || 0,
         enableAI: parseBool(r.EnableAI),
+        requirePassword: Boolean(clean(r.Password)),
       };
     })
     .filter((c) => c.language && c.catalog);
+}
+
+// Xác thực mật khẩu của một bài test (chỉ chạy ở server).
+// Đọc lại tab config để lấy cột Password, so khớp theo Language + Catalog.
+// Trả về: required = bài có đặt mật khẩu hay không; ok = mật khẩu nhập có khớp.
+export async function verifyTestPassword(
+  language: string,
+  catalog: string,
+  password: string,
+): Promise<{ required: boolean; ok: boolean }> {
+  const rows = await getValues(CONFIG_SHEET);
+  const lang = clean(language).toLowerCase();
+  const cat = clean(catalog).toLowerCase();
+  const row = rows.find(
+    (r) =>
+      clean(r.Language).toLowerCase() === lang &&
+      clean(r.Catalog).toLowerCase() === cat,
+  );
+  const expected = clean(row?.Password);
+  if (!expected) return { required: false, ok: true };
+  return { required: true, ok: clean(password) === expected };
 }
 
 // Đọc câu hỏi cho 1 bài test. Mỗi bài = 1 tab riêng, tên tab = Catalog

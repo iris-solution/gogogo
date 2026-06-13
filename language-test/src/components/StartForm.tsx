@@ -20,6 +20,7 @@ interface Props {
   onStart: (
     candidate: Candidate,
     config: TestConfig,
+    password: string,
   ) => Promise<{ error?: string }>;
 }
 
@@ -32,6 +33,7 @@ export default function StartForm({ configs, onStart }: Props) {
   const [email, setEmail] = useState("");
   const [language, setLanguage] = useState(languages[0] ?? "");
   const [catalog, setCatalog] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,7 +43,13 @@ export default function StartForm({ configs, onStart }: Props) {
   );
 
   const selected = tests.find((t) => t.catalog === catalog);
-  const canStart = name.trim() && email.trim() && selected && !loading;
+  const needPassword = Boolean(selected?.requirePassword);
+  const canStart =
+    name.trim() &&
+    email.trim() &&
+    selected &&
+    (!needPassword || password.trim()) &&
+    !loading;
 
   async function handleStart() {
     if (!selected) {
@@ -52,11 +60,16 @@ export default function StartForm({ configs, onStart }: Props) {
       setError("Vui lòng nhập họ tên và ID nhân viên.");
       return;
     }
+    if (needPassword && !password.trim()) {
+      setError("Vui lòng nhập mật khẩu để bắt đầu bài test.");
+      return;
+    }
     setError("");
     setLoading(true);
     const res = await onStart(
       { name: name.trim(), email: email.trim() },
       selected,
+      password,
     );
     setLoading(false);
     if (res.error) setError(res.error);
@@ -114,6 +127,7 @@ export default function StartForm({ configs, onStart }: Props) {
                   onClick={() => {
                     setLanguage(lng);
                     setCatalog("");
+                    setPassword("");
                   }}
                   className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
                     language === lng
@@ -133,7 +147,10 @@ export default function StartForm({ configs, onStart }: Props) {
                 <button
                   key={t.catalog}
                   type="button"
-                  onClick={() => setCatalog(t.catalog)}
+                  onClick={() => {
+                    setCatalog(t.catalog);
+                    setPassword("");
+                  }}
                   className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-all ${
                     catalog === t.catalog
                       ? "border-red-500 bg-red-50 ring-1 ring-red-200"
@@ -160,6 +177,26 @@ export default function StartForm({ configs, onStart }: Props) {
               )}
             </div>
           </Field>
+
+          {needPassword && (
+            <Field label="Mật khẩu bài test" required>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && canStart) handleStart();
+                }}
+                placeholder="Nhập mật khẩu được cấp"
+                autoComplete="off"
+                className="input"
+              />
+              <p className="mt-1.5 text-xs text-zinc-400">
+                Bài test này yêu cầu mật khẩu. Vui lòng liên hệ người phụ trách
+                nếu bạn chưa có.
+              </p>
+            </Field>
+          )}
 
           {error && (
             <div className="animate-[fadeInUp_0.3s_ease-out] rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

@@ -47,7 +47,7 @@ export interface PassageQuestion extends Base {
 export type QuizItem = Answerable | PassageQuestion;
 
 // Một bài test lấy từ tab `config`:
-// Language | Catalog | QuestionSheet | Title | TimeLimit | EnableAI
+// Language | Catalog | QuestionSheet | Title | TimeLimit | EnableAI | Password
 export interface TestConfig {
   language: string; // mã ngôn ngữ, vd ENG, CN
   catalog: string; // mã bài test, vd TOIEC1, PT2
@@ -55,6 +55,9 @@ export interface TestConfig {
   title: string; // tên hiển thị của bài, vd TEST
   timeLimitMin: number; // giới hạn thời gian (phút)
   enableAI: boolean; // true = tự động chấm câu tự luận bằng AI
+  // true = bài này yêu cầu nhập mật khẩu mới được bắt đầu.
+  // CHỈ là cờ; mật khẩu thật KHÔNG bao giờ gửi xuống client, chỉ xác thực ở server.
+  requirePassword: boolean;
 }
 
 export interface Candidate {
