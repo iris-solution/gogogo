@@ -55,6 +55,37 @@ export function isAnswered(
     : (fill[q.id]?.trim().length ?? 0) > 0;
 }
 
+// Mô tả lựa chọn trắc nghiệm dạng "A. nội dung" (rơi về letter nếu thiếu text).
+function describeChoice(q: Answerable, keys: string[]): string {
+  if (q.kind !== "choice") return keys.join(", ");
+  return keys
+    .map((k) => {
+      const opt = q.options.find((o) => o.key === k);
+      return opt ? `${k}. ${opt.text}` : k;
+    })
+    .join(" | ");
+}
+
+// Câu trả lời của ứng viên dưới dạng text (để ghi vào sheet Details).
+export function answerText(
+  q: Answerable,
+  choice: ChoiceAnswers,
+  fill: FillAnswers,
+): string {
+  if (q.kind === "choice") {
+    const keys = choice[q.id] ?? [];
+    return keys.length > 0 ? describeChoice(q, keys) : "(không trả lời)";
+  }
+  const typed = (fill[q.id] ?? "").trim();
+  return typed || "(không trả lời)";
+}
+
+// Đáp án đúng dưới dạng text (tham khảo).
+export function correctText(q: Answerable): string {
+  if (q.kind === "choice") return describeChoice(q, q.correct);
+  return q.accepted.length > 0 ? q.accepted.join(" / ") : "";
+}
+
 export function formatDuration(totalSec: number): string {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
@@ -77,6 +108,8 @@ export function computeResult(
     id: q.id,
     question: q.question,
     correct: isCorrect(q, choice, fill),
+    answer: answerText(q, choice, fill),
+    correctAnswer: correctText(q) || undefined,
   }));
   const score = perQuestion.filter((p) => p.correct).length;
   const total = gradables.length;

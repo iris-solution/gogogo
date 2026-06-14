@@ -73,6 +73,8 @@ export interface PerQuestionResult {
   id: string;
   question: string;
   correct: boolean;
+  answer: string; // câu trả lời của ứng viên (dạng text, gồm cả đáp án trắc nghiệm)
+  correctAnswer?: string; // đáp án đúng (tham khảo)
 }
 
 // Câu tự luận: tách riêng khỏi điểm tự động, lưu nội dung trả lời để chấm (AI hoặc tay)

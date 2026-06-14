@@ -3,8 +3,8 @@ import { getSheetsClient, SPREADSHEET_ID } from "./google";
 import { quoteSheet } from "./sheet";
 import type { EssayGrade, TestResult } from "./types";
 
-// Cột tab {LANG}-Responses:
-// Timestamp | Name | Test | Score | Percent | Duration | Email | Language | Details | Essay
+// Cột tab {CATALOG}-Responses:
+// Timestamp | Name | Test | Score | Percent | Duration | EmployeeId | Language | Details | Essay
 const HEADERS = [
   "Timestamp",
   "Name",
@@ -12,7 +12,7 @@ const HEADERS = [
   "Score",
   "Percent",
   "Duration",
-  "Email",
+  "EmployeeId",
   "Language",
   "Details",
   "Essay",
@@ -65,22 +65,18 @@ async function ensureResponseSheet(catalog: string): Promise<string> {
     });
   }
 
-  // Tắt "tràn chữ" của Google Sheets ở cột Essay: đặt wrap = CLIP để nội dung
-  // dài không lan sang ô khác (vẫn xem đủ khi click vào ô).
+  // Tắt "tràn chữ" của Google Sheets cho TOÀN BỘ sheet: đặt wrap = CLIP để nội
+  // dung dài không lan sang ô khác (vẫn xem đủ khi click vào ô). Range chỉ có
+  // sheetId (không giới hạn cột) sẽ áp dụng cho mọi ô.
   const sheetId = sheet?.properties?.sheetId;
-  const essayCol = HEADERS.indexOf("Essay");
-  if (sheetId != null && essayCol >= 0) {
+  if (sheetId != null) {
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
       requestBody: {
         requests: [
           {
             repeatCell: {
-              range: {
-                sheetId,
-                startColumnIndex: essayCol,
-                endColumnIndex: essayCol + 1,
-              },
+              range: { sheetId },
               cell: { userEnteredFormat: { wrapStrategy: "CLIP" } },
               fields: "userEnteredFormat.wrapStrategy",
             },

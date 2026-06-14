@@ -15,6 +15,9 @@ function langLabel(code: string): string {
   return LANG_LABEL[code] ?? code;
 }
 
+// ID nhân viên: đúng 5 chữ số và bắt đầu bằng số 0 (vd 01234).
+const EMP_ID_RE = /^0\d{4}$/;
+
 interface Props {
   configs: TestConfig[];
   onStart: (
@@ -44,9 +47,10 @@ export default function StartForm({ configs, onStart }: Props) {
 
   const selected = tests.find((t) => t.catalog === catalog);
   const needPassword = Boolean(selected?.requirePassword);
+  const validEmpId = EMP_ID_RE.test(email);
   const canStart =
     name.trim() &&
-    email.trim() &&
+    validEmpId &&
     selected &&
     (!needPassword || password.trim()) &&
     !loading;
@@ -56,8 +60,12 @@ export default function StartForm({ configs, onStart }: Props) {
       setError("Vui lòng chọn bài test.");
       return;
     }
-    if (!name.trim() || !email.trim()) {
-      setError("Vui lòng nhập họ tên và ID nhân viên.");
+    if (!name.trim()) {
+      setError("Vui lòng nhập họ tên.");
+      return;
+    }
+    if (!validEmpId) {
+      setError("ID nhân viên phải gồm 5 chữ số và bắt đầu bằng số 0 (vd 01234).");
       return;
     }
     if (needPassword && !password.trim()) {
@@ -111,11 +119,19 @@ export default function StartForm({ configs, onStart }: Props) {
           <Field label="ID nhân viên" required>
             <input
               type="text"
+              inputMode="numeric"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="VD: 12345"
+              // Chỉ cho nhập chữ số, tối đa 5 ký tự (vd 01234).
+              onChange={(e) =>
+                setEmail(e.target.value.replace(/\D/g, "").slice(0, 5))
+              }
+              placeholder="VD: 01234"
+              maxLength={5}
               className="input"
             />
+            <p className="mt-1.5 text-xs text-zinc-400">
+              Gồm 5 chữ số và bắt đầu bằng số 0 (vd 01234).
+            </p>
           </Field>
 
           <Field label="Ngôn ngữ" required>
